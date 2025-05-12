@@ -1,0 +1,11 @@
+#============================================================================================================
+# C O P Y R I G H T
+#------------------------------------------------------------------------------------------------------------
+# copyright (C) 2025 Robert Bosch GmbH and Cariad SE. All rights reserved.
+#============================================================================================================
+
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+teamNamespace: "argo-dev"
+environment: "dev"
