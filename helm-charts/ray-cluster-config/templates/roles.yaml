@@ -1,0 +1,31 @@
+#============================================================================================================
+# C O P Y R I G H T
+#------------------------------------------------------------------------------------------------------------
+# copyright (C) 2025 Robert Bosch GmbH and Cariad SE. All rights reserved.
+#============================================================================================================
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ray-user
+  namespace: {{ .Values.teamNamespace }}
+rules:
+- apiGroups: ["ray.io"]
+  resources:
+  - 'rayclusters'
+  verbs: ["*"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kube-rbac-proxy
+rules:
+- apiGroups: ["authentication.k8s.io"]
+  resources:
+  - tokenreviews
+  verbs: ["create"]
+- apiGroups: ["authorization.k8s.io"]
+  resources:
+  - subjectaccessreviews
+  verbs: ["create"]

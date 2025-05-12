@@ -1,0 +1,25 @@
+#============================================================================================================
+# C O P Y R I G H T
+#------------------------------------------------------------------------------------------------------------
+# copyright (C) 2025 Robert Bosch GmbH and Cariad SE. All rights reserved.
+#============================================================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kube-rbac-proxy
+  namespace: {{ .Values.teamNamespace }}
+data:
+  config-file.yaml: |+
+    authorization:
+      resourceAttributes:
+        namespace: {{ .Values.teamNamespace }}
+        apiVersion: v1
+        apiGroup: ray.io
+        resource: rayclusters
+        name: ray-cluster-with-auth
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kube-rbac-proxy
+  namespace: {{ .Values.teamNamespace }}

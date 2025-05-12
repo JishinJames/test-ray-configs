@@ -1,0 +1,122 @@
+#============================================================================================================
+# C O P Y R I G H T
+#------------------------------------------------------------------------------------------------------------
+# copyright (C) 2025 Robert Bosch GmbH and Cariad SE. All rights reserved.
+#============================================================================================================
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ray-cluster-dashboard
+  namespace: {{ .Values.teamNamespace }}
+spec:
+  gateways:
+  - istio-ingress-public/ray-{{ .Values.teamNamespace }}-gateway # this is the BCN internal ingress
+  hosts:
+  - "ray-dashboard-{{ .Values.teamNamespace }}.{{ .Values.environment }}.dll.aadpace.com"
+  http:
+    - match:
+        - uri:
+            prefix: /
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: ray-cluster-head-svc
+            port:
+              number: 8265
+
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ray-cluster-client
+  namespace: {{ .Values.teamNamespace }}
+spec:
+  gateways:
+  - istio-ingress-public/ray-{{ .Values.teamNamespace }}-gateway # this is the BCN internal ingress
+  hosts:
+  - "ray-client-{{ .Values.teamNamespace }}.{{ .Values.environment }}.dll.aadpace.com"
+  http:
+    - match:
+        - uri:
+            prefix: /
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: ray-cluster-head-svc
+            port:
+              number: 10001
+
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ray-cluster-gcs
+  namespace: {{ .Values.teamNamespace }}
+spec:
+  gateways:
+  - istio-ingress-public/ray-{{ .Values.teamNamespace }}-gateway # this is the BCN internal ingress
+  hosts:
+  - "ray-gcs-{{ .Values.teamNamespace }}.{{ .Values.environment }}.dll.aadpace.com"
+  http:
+    - match:
+        - uri:
+            prefix: /
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: ray-cluster-head-svc
+            port:
+              number: 6379
+
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ray-cluster-metrics
+  namespace: {{ .Values.teamNamespace }}
+spec:
+  gateways:
+  - istio-ingress-public/ray-{{ .Values.teamNamespace }}-gateway # this is the BCN internal ingress
+  hosts:
+  - "ray-metrics-{{ .Values.teamNamespace }}.{{ .Values.environment }}.dll.aadpace.com"
+  http:
+    - match:
+        - uri:
+            prefix: /
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: ray-cluster-head-svc
+            port:
+              number: 8080
+
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ray-cluster-ssd
+  namespace: {{ .Values.teamNamespace }}
+spec:
+  gateways:
+  - istio-ingress-public/ray-{{ .Values.teamNamespace }}-gateway # this is the BCN internal ingress
+  hosts:
+  - "ray-ssd-{{ .Values.teamNamespace }}.{{ .Values.environment }}.dll.aadpace.com"
+  http:
+    - match:
+        - uri:
+            prefix: /
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: ray-cluster-head-svc
+            port:
+              number: 22

@@ -1,0 +1,35 @@
+#============================================================================================================
+# C O P Y R I G H T
+#------------------------------------------------------------------------------------------------------------
+# copyright (C) 2025 Robert Bosch GmbH and Cariad SE. All rights reserved.
+#============================================================================================================
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: ray-{{ .Values.teamNamespace }}-gateway
+  namespace: istio-ingress-public
+spec:
+  selector:
+    istio: ingress-public
+  servers:
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      tls:
+        credentialName: "gateway-cert-public"
+        minProtocolVersion: "TLSV1_2"
+        mode: "SIMPLE"
+        cipherSuites:
+          #Strong Cypher Suite
+          - "ECDHE-RSA-AES256-GCM-SHA384"
+          - "ECDHE-RSA-CHACHA20-POLY1305"
+          - "ECDHE-RSA-AES128-GCM-SHA256"
+          - "ECDHE-RSA-AES256-SHA"
+          - "ECDHE-RSA-AES128-SHA"
+      hosts:
+        - "ray-dashboard-{{ .Values.teamNamespace }}.{{ .Values.environment }}.dll.aadpace.com"
+        - "ray-client-{{ .Values.teamNamespace }}.{{ .Values.environment }}.dll.aadpace.com"
+        - "ray-ssd-{{ .Values.teamNamespace }}.{{ .Values.environment }}.dll.aadpace.com"
+        - "ray-gcs-{{ .Values.teamNamespace }}.{{ .Values.environment }}.dll.aadpace.com"
+        - "ray-metrics-{{ .Values.teamNamespace }}.{{ .Values.environment }}.dll.aadpace.com"

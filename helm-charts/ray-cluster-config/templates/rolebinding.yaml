@@ -1,0 +1,33 @@
+#============================================================================================================
+# C O P Y R I G H T
+#------------------------------------------------------------------------------------------------------------
+# copyright (C) 2025 Robert Bosch GmbH and Cariad SE. All rights reserved.
+#============================================================================================================
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ray-user
+  namespace: {{ .Values.teamNamespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ray-user
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.teamNamespace }}
+  namespace: {{ .Values.teamNamespace }}
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kube-rbac-proxy
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kube-rbac-proxy
+subjects:
+- kind: ServiceAccount
+  name: kube-rbac-proxy
+  namespace: {{ .Values.teamNamespace }}
