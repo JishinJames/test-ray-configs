@@ -1,0 +1,36 @@
+#============================================================================================================
+# C O P Y R I G H T
+#------------------------------------------------------------------------------------------------------------
+# copyright (C) 2025 Robert Bosch GmbH and Cariad SE. All rights reserved.
+#============================================================================================================
+apiVersion: ray.io/v1alpha1
+kind: RayCluster
+metadata:
+  name: {{ .Values.rayClusterName }}
+  namespace: {{ .Values.teamNamespace }}
+spec:
+  # The version of Ray you are using. Make sure all Ray containers are running this version of Ray.
+  # Use the Ray nightly or Ray version >= 2.10.0 and KubeRay 1.1.0 or later for autoscaler v2.
+  rayVersion: '{{ .Values.rayVersion }}'
+  enableInTreeAutoscaling: true
+  autoscalerOptions:
+    upscalingMode: Default
+    idleTimeoutSeconds: 60
+    imagePullPolicy: Always
+    # Optionally specify the Autoscaler container's securityContext.
+    securityContext: {}
+    env: []
+    envFrom: []
+    resources:
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+      requests:
+        cpu: "500m"
+        memory: "512Mi"
+  # Ray head pod template
+  headGroupSpec:
+{{ toYaml .Values.headGroupSpec | indent 4 }}
+  workerGroupSpecs:
+  # the Pod replicas in this group typed worker
+{{ toYaml .Values.workerGroupSpecs | indent 4 }}
