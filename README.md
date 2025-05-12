@@ -1,4 +1,4 @@
-# Ray Cluster Helm Chart
+# General Webhook Helm Chart
 
 A typical helm package for configuring ray cluster.
 
