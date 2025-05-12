@@ -1,0 +1,30 @@
+#============================================================================================================
+# C O P Y R I G H T
+#------------------------------------------------------------------------------------------------------------
+# copyright (C) 2024 Robert Bosch GmbH and Cariad SE. All rights reserved.
+#============================================================================================================
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ray-config
+  namespace: argo-dev
+spec:
+  interval: 5m
+  releaseName: ray-config
+  targetNamespace: argo-dev
+  chart:
+    spec:
+      chart: ray-cluster
+      version: "1.0.6"
+      sourceRef:
+        kind: HelmRepository
+        name: oci-helm-repo-crdlldev
+        namespace: flux-system
+      interval: 1m
+  install:
+    remediation:
+      retries: 3
+    createNamespace: false
+  values:
+    teamNamespace: "argo-dev"
+    environment: "test"

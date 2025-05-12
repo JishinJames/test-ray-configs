@@ -1,0 +1,140 @@
+#============================================================================================================
+# C O P Y R I G H T
+#------------------------------------------------------------------------------------------------------------
+# copyright (C) 2024 Robert Bosch GmbH and Cariad SE. All rights reserved.
+#============================================================================================================
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ray-cluster
+  namespace: argo-dev
+spec:
+  interval: 5m
+  releaseName: ray-cluster
+  targetNamespace: argo-dev
+  chart:
+    spec:
+      chart: ray-head-worker-chart
+      version: "1.0.7"
+      sourceRef:
+        kind: HelmRepository
+        name: oci-helm-repo-crdlldev
+        namespace: flux-system
+      interval: 1m
+  install:
+    remediation:
+      retries: 3
+    createNamespace: false
+  values:
+    rayClusterName: "ray-cluster"
+    teamNamespace: "argo-dev"
+    rayVersion: '2.43.0'
+
+    headGroupSpec:
+      rayStartParams:
+        dashboard-host: '127.0.0.1'
+        ray-client-server-port: "10001"
+        # Setting "num-cpus: 0" to avoid any Ray actors or tasks being scheduled on the Ray head Pod.
+        num-cpus: "0"
+      # Pod template
+      template:
+        metadata: # Pod metadata
+            labels: {}
+        spec:
+          nodeSelector:
+            nodepool: agentpool
+          serviceAccountName: kube-rbac-proxy
+          containers:
+          # The Ray head container
+          - name: ray-head
+            image: crdlldev.azurecr.io/ray-ssh:latest
+            imagePullPolicy: Always
+            ports:
+            - containerPort: 6379
+              name: gcs
+            - containerPort: 8265
+              name: dashboard
+            - containerPort: 10001
+              name: client
+            - containerPort: 8080
+              name: metrics
+            - containerPort: 22
+              name: ssd
+            resources:
+              limits:
+                cpu: "3"
+                memory: "2G"
+              requests:
+                cpu: "1"
+                memory: "2G"
+            readinessProbe:
+              exec:
+                command:
+                - bash
+                - -c
+                - wget -T 20 -q -O- http://localhost:52365/api/local_raylet_healthz | grep
+                  success && wget -T 4 0 -q -O- http://localhost:8265/api/gcs_healthz | grep
+                  success
+              failureThreshold: 10
+              initialDelaySeconds: 10
+              periodSeconds: 5
+              successThreshold: 1
+              timeoutSeconds: 2
+            livenessProbe:
+              exec:
+                command:
+                - bash
+                - -c
+                - wget -T 20 -q -O- http://localhost:52365/api/local_raylet_healthz | grep
+                  success && wget -T 40 -q -O- http://localhost:8265/api/gcs_healthz | grep
+                  success
+              failureThreshold: 120
+              initialDelaySeconds: 30
+              periodSeconds: 5
+              successThreshold: 1
+              timeoutSeconds: 2
+            env:
+              - name: RAY_enable_autoscaler_v2 # Pass env var for the autoscaler v2.
+                value: "1"
+              - name: RAY_HEAD
+                value: "1"
+            command: ["service ssh start"]
+          - name: kube-rbac-proxy
+            image: quay.io/brancz/kube-rbac-proxy:v0.18.1
+            args:
+              - "--insecure-listen-address=0.0.0.0:10000"
+              - "--upstream=http://127.0.0.1:8443/"
+              - "--config-file=/etc/kube-rbac-proxy/config-file.yaml"
+              - "--logtostderr=true"
+            volumeMounts:
+            - name: config
+              mountPath: /etc/kube-rbac-proxy
+          volumes:
+          - name: config
+            configMap:
+              name: kube-rbac-proxy
+          restartPolicy: Never # No restart to avoid reuse of pod for different ray nodes.
+
+    workerGroupSpecs:
+      - groupName: sample-cpu-worker-group
+        replicas: 0
+        minReplicas: 0
+        maxReplicas: 3
+        rayStartParams: {}
+        # Pod template
+        template:
+          spec:
+            nodeSelector:
+              nodepool: agentpool
+            containers:
+            - name: ray-worker
+              image: crdlldev.azurecr.io/ray-ssh:latest
+              imagePullPolicy: Always
+              resources:
+                limits:
+                  cpu: "1"
+                  memory: "1G"
+                requests:
+                  cpu: "1"
+                  memory: "1G"
+            restartPolicy: Never # Never restart a pod to avoid pod reuse

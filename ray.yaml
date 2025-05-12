@@ -1,0 +1,101 @@
+apiVersion: ray.io/v1alpha1
+kind: RayCluster
+metadata:
+  name: rayclustertest
+  namespace: argo-dev
+spec:
+  rayVersion: "2.44.0"
+  # enableInTreeAutoscaling: true
+  # autoscalerOptions:
+  #    ...
+  enableInTreeAutoscaling: true
+
+  autoscalerOptions:
+    upscalingMode: Default
+    idleTimeoutSeconds: 60
+    imagePullPolicy: Always
+    # Optionally specify the Autoscaler container's securityContext.
+    securityContext: {}
+    env: []
+    envFrom: []
+    resources:
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+      requests:
+        cpu: "500m"
+        memory: "512Mi"
+
+  headGroupSpec:
+    serviceType: ClusterIP # Options are ClusterIP, NodePort, and LoadBalancer
+    # rayStartParams: {}
+    rayStartParams:
+      num-cpus: "0"
+      # dashboard-host: "0.0.0.0"
+    template: # Pod template
+        metadata: # Pod metadata
+          labels: {}
+        spec: # Pod spec
+            nodeSelector:
+              # ray.io/role: head
+              nodepool: agentpool
+            containers:
+            - name: ray-head
+              image: crdlldev.azurecr.io/ray-ssh:latest
+              # resources:
+              #   limits:
+              #     cpu: 1
+              #     memory: 2Gi
+              resources:
+                limits:
+                  cpu: "1"
+                  memory: "2G"
+                requests:
+                  cpu: "1"
+                  memory: "2G"
+              ports: # Optional service port overrides
+              - containerPort: 6379
+                name: gcs
+              - containerPort: 8265
+                name: dashboard
+              - containerPort: 10001
+                name: client
+              - containerPort: 22
+                name: sshd
+              env:
+              - name: RAY_enable_autoscaler_v2 # Pass env var for the autoscaler v2.
+                value: "1"
+              - name: RAY_HEAD
+                value: "1"
+              command: ["service ssh start"]
+            restartPolicy: Always
+
+  workerGroupSpecs:
+  - groupName: rayclustertest-worker-group-1
+    replicas: 0
+    minReplicas: 0
+    maxReplicas: 4
+    rayStartParams: {}
+    template:
+      spec:
+        nodeSelector:
+          ray.io/role: worker
+          # kubernetes.io/hostname: "worker-pool-1"
+          nodepool: minion
+        containers:
+          - name: ray-worker
+            image: crdlldev.azurecr.io/ray-ssh:latest
+            # resources:
+            #   limits:
+            #     cpu: 1
+            #     memory: 2Gi
+            resources:
+              limits:
+                cpu: "1"
+                memory: "1G"
+              requests:
+                cpu: "1"
+                memory: "1G"
+            ports:
+              - containerPort: 6380  # Ray's worker communication port
+        restartPolicy: Never
