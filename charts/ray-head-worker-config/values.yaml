@@ -20,8 +20,6 @@ headGroupSpec:
     metadata: # Pod metadata
         labels: {}
     spec:
-      nodeSelector:
-        nodepool: argolarge
       containers:
       # The Ray head container
       - name: ray-head
@@ -59,8 +57,6 @@ workerGroupSpecs:
     # Pod template
     template:
       spec:
-        nodeSelector:
-          nodepool: normal
         containers:
         - name: ray-worker
           image: rayproject/ray:2.43.0
