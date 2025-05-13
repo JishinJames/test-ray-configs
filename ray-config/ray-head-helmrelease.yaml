@@ -18,7 +18,7 @@ spec:
       version: "1.0.7"
       sourceRef:
         kind: HelmRepository
-        name: oci-helm-repo-crdlldev
+        name: crhelmdev
         namespace: flux-system
       interval: 1m
   install:
