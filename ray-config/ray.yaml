@@ -41,7 +41,7 @@ spec:
               nodepool: agentpool
             containers:
             - name: ray-head
-              image: crdlldev.azurecr.io/ray-ssh:latest
+              image: ray-ssh:latest
               # resources:
               #   limits:
               #     cpu: 1
@@ -84,7 +84,7 @@ spec:
           nodepool: minion
         containers:
           - name: ray-worker
-            image: crdlldev.azurecr.io/ray-ssh:latest
+            image: ray-ssh:latest
             # resources:
             #   limits:
             #     cpu: 1
