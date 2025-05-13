@@ -41,13 +41,11 @@ spec:
         metadata: # Pod metadata
             labels: {}
         spec:
-          nodeSelector:
-            nodepool: agentpool
           serviceAccountName: kube-rbac-proxy
           containers:
           # The Ray head container
           - name: ray-head
-            image: crdlldev.azurecr.io/ray-ssh:latest
+            image: ray-ssh:latest
             imagePullPolicy: Always
             ports:
             - containerPort: 6379
@@ -124,11 +122,9 @@ spec:
         # Pod template
         template:
           spec:
-            nodeSelector:
-              nodepool: agentpool
             containers:
             - name: ray-worker
-              image: crdlldev.azurecr.io/ray-ssh:latest
+              image: ray-ssh:latest
               imagePullPolicy: Always
               resources:
                 limits:

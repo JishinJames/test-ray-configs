@@ -9,7 +9,7 @@ metadata:
 spec:
   containers:
   - name: ray-head
-    image: crdlldev.azurecr.io/ray-ssh:latest  # Make sure this image is available in your registry or built on your node
+    image: ray-ssh:latest  # Make sure this image is available in your registry or built on your node
     imagePullPolicy: Always
     ports:
       - containerPort: 22      # SSH
